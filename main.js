@@ -7,17 +7,20 @@
 let ctx;
 const CANVASWIDTH = 500;
 const CANVASHEIGHT = 500;
-const PLAYER_WIDTH = 20;
-const PLAYER_HEIGHT = 30;
+const PLAYER_WIDTH = 35;
+const PLAYER_HEIGHT = 35;
+const PLAYER_IMAGE = new Image();
+PLAYER_IMAGE.src = "ship_v1.png";
+const PROJ_IMAGE = new Image();
+PROJ_IMAGE.src = "bullet.png";
 const PROJ_WIDTH = 5;
-const PROJ_HEIGHT = 5;
+const PROJ_HEIGHT = 10;
+const PROJ_SPEED = 5;
 let playerX = CANVASWIDTH / 2;
 let playerY = CANVASHEIGHT - 50;
 let projY = playerY;
-let projX = playerX + PLAYER_WIDTH / 2;
-let playerColor = "#45A1E9";
-let leftPressed;
-let rightPressed;
+let projectileArray = [];
+const keysPressed = {};
 
 // starting the canvas and making the framerate 60fps
 
@@ -32,62 +35,74 @@ const startCanvas = () => {
 const updateCanvas = () => {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, CANVASWIDTH, CANVASHEIGHT);
-  ctx.fillStyle = "green";
-  ctx.fillRect(playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(PLAYER_IMAGE, playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
   movePlayer();
+  drawProjectiles();
 };
-
-const drawProjectile = () => {
-  ctx.fillStyle = "white";
-  ctx.fillRect(projX, projY, PROJ_WIDTH, PROJ_HEIGHT);
-};
-
-// logging which keys were pressed in order to move or shoot projectiles
-
-const keyPressed = (keyboardEvent) => {
-  let keyPressed = keyboardEvent.key;
-  if (keyPressed == "a") {
-    leftPressed = true;
-    console.log(keyboardEvent.key);
-  } else if (keyPressed == "d") {
-    rightPressed = true;
-    console.log(keyboardEvent.key);
-  } else if (keyPressed == " ") {
-    console.log("space");
-    drawProjectile();
-  }
-};
-
-window.addEventListener("keydown", keyPressed);
-
-// figuring out when keys are not pressed so that the character stops moving
-
-const keyDepressed = (keyboardEvent) => {
-  let keyDepressed = keyboardEvent.key;
-  if (keyDepressed == "a") {
-    leftPressed = false;
-  } else if (keyDepressed == "d") {
-    rightPressed = false;
-  }
-};
-
-window.addEventListener("keyup", keyDepressed);
-
-// taking the info from the keyPressed function and using it to move the player
 
 const movePlayer = () => {
   const playerSpeed = Math.PI / (Math.PI / 2);
-  if (leftPressed) {
+  if (keysPressed["a"]) {
     playerX -= playerSpeed;
     if (playerX < -PLAYER_WIDTH / 2) {
       playerX = CANVASWIDTH - PLAYER_WIDTH / 2;
     }
-  } else if (rightPressed) {
+  }
+  if (keysPressed["d"]) {
     playerX += playerSpeed;
     if (playerX > CANVASWIDTH - PLAYER_WIDTH / 2) {
       playerX = -PLAYER_WIDTH / 2;
     }
   }
 };
+
+const drawProjectiles = () => {
+  for (const projectile of projectileArray) {
+    console.log(projectile);
+    ctx.drawImage(
+      PROJ_IMAGE,
+      projectile.x,
+      projectile.y,
+      PROJ_WIDTH,
+      PROJ_HEIGHT
+    );
+    projectile.y -= PROJ_SPEED;
+  }
+};
+
+// logging which keys were pressed in order to move or shoot projectiles
+
+const keyPressed = (keyboardEvent) => {
+  keysPressed[keyboardEvent.key] = true;
+};
+
+window.addEventListener("keydown", keyPressed);
+
+// figuring out when keys are not pressed so that the character stops moving
+
+const keyUp = (keyboardEvent) => {
+  delete keysPressed[keyboardEvent.key];
+  if (keyboardEvent.key == " ") {
+    projectileArray.push(
+      new Projectile(playerX + PLAYER_WIDTH / 2 - PROJ_WIDTH / 2, playerY)
+    );
+    console.log(projectileArray);
+  }
+};
+
+window.addEventListener("keyup", keyUp);
+
+class Projectile {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  moveProjectile() {
+    this.y -= PROJ_SPEED;
+  }
+}
+
+// taking the info from the keyPressed function and using it to move the player
 
 startCanvas();
