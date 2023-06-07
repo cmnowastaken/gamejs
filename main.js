@@ -13,6 +13,8 @@ const PLAYER_IMAGE = new Image();
 PLAYER_IMAGE.src = "ship_v1.png";
 const PROJ_IMAGE = new Image();
 PROJ_IMAGE.src = "bullet.png";
+const BASIC_ENEMY_IMAGE = new Image();
+BASIC_ENEMY_IMAGE.src = "enemyshipdefault.png";
 const PROJ_WIDTH = 5;
 const PROJ_HEIGHT = 10;
 const PROJ_SPEED = 5;
@@ -21,6 +23,8 @@ let playerY = CANVASHEIGHT - 50;
 let projY = playerY;
 let projectileArray = [];
 const keysPressed = {};
+let basicEnemyArray = [];
+let basicEnemyNumber = 0;
 
 // starting the canvas and making the framerate 60fps
 
@@ -42,7 +46,7 @@ const updateCanvas = () => {
 };
 
 const movePlayer = () => {
-  const playerSpeed = Math.PI / (Math.PI / 2);
+  const playerSpeed = Math.PI / (Math.PI / 2); // lol
   if (keysPressed["a"]) {
     playerX -= playerSpeed;
     if (playerX < -PLAYER_WIDTH / 2) {
@@ -54,6 +58,16 @@ const movePlayer = () => {
     if (playerX > CANVASWIDTH - PLAYER_WIDTH / 2) {
       playerX = -PLAYER_WIDTH / 2;
     }
+  }
+};
+
+const spawnL1Enemies = () => {
+  if (basicEnemyNumber < 4) {
+    basicEnemyArray.push(new Enemy(enemySpawnX, enemySpawnY));
+    basicEnemyNumber++;
+  }
+  for (const enemy of basicEnemyArray) {
+    ctx.drawImage(BASIC_ENEMY_IMAGE, enemySpawnX, enemySpawnY);
   }
 };
 
@@ -87,7 +101,6 @@ const keyUp = (keyboardEvent) => {
     projectileArray.push(
       new Projectile(playerX + PLAYER_WIDTH / 2 - PROJ_WIDTH / 2, playerY)
     );
-    console.log(projectileArray);
   }
 };
 
@@ -100,6 +113,13 @@ class Projectile {
   }
   moveProjectile() {
     this.y -= PROJ_SPEED;
+  }
+}
+
+class Enemy {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
   }
 }
 
