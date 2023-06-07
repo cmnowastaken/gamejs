@@ -50,6 +50,8 @@ const updateCanvas = () => {
   drawProjectiles();
   moveL1Enemies();
   renderL1Enemies();
+  basicEnemyHit();
+  removeRedundantProjectiles();
 };
 
 const movePlayer = () => {
@@ -143,25 +145,25 @@ const keyUp = (keyboardEvent) => {
 window.addEventListener("keyup", keyUp);
 
 const basicEnemyHit = () => {
-  let projHitLeft = projectile.x;
-  let projHitTop = projectile.y;
-  let projHitBottom = projectile.y + BASIC_ENEMY_HEIGHT;
-  let projHitRight = projectile.x + BASIC_ENEMY_WIDTH;
+  for (const projectile of projectileArray) {
+    for (const enemy of basicEnemyArray) {
+      if (projectile.checkEnemyCollision(enemy)) {
+        const projIndex = projectileArray.indexOf(projectile);
+        const enemyIndex = basicEnemyArray.indexOf(enemy);
+        basicEnemyArray.splice(enemyIndex, 1);
+        projectileArray.splice(projIndex, 1);
+      }
+      // die
+    }
+  }
+};
 
-  let enemyHitLeft = enemy.x;
-  let enemyHitTop = enemy.y;
-  let enemyHitBottom = enemy.y + BASIC_ENEMY_HEIGHT;
-  let enemyHitRight = enemy.x + BASIC_ENEMY_WIDTH;
-
-  if (
-    projHitRight > enemyHitLeft &&
-    projHitLeft < enemyHitRight &&
-    projHitTop < enemyHitBottom &&
-    projHitBottom > enemyHitTop
-  ) {
-    return true;
-  } else {
-    return false;
+const removeRedundantProjectiles = () => {
+  for (const projectile of projectileArray) {
+    if (projectile.y < 0) {
+      const projIndex = projectileArray.indexOf(projectile);
+      projectileArray.splice(projIndex, 1);
+    }
   }
 };
 
@@ -173,6 +175,14 @@ class Projectile {
   moveProjectile() {
     this.y -= PROJ_SPEED;
   }
+  checkEnemyCollision(enemy) {
+    return (
+      this.x > enemy.x &&
+      this.x < enemy.x + enemy.width &&
+      this.y > enemy.y &&
+      this.y < enemy.y + enemy.height
+    );
+  }
 }
 
 class Enemy {
@@ -180,6 +190,8 @@ class Enemy {
     this.x = x;
     this.y = y;
     this.pos = pos;
+    this.height = height;
+    this.width = width;
   }
 }
 
