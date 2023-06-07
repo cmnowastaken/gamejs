@@ -24,7 +24,12 @@ let projY = playerY;
 let projectileArray = [];
 const keysPressed = {};
 let basicEnemyArray = [];
-let basicEnemyNumber = 0;
+const L1_ENEMY_SPAWN_X = 250;
+const L1_ENEMY_SPAWN_Y = 150;
+const BASIC_ENEMY_HEIGHT = 30;
+const BASIC_ENEMY_WIDTH = 30;
+const L1_ENEMY_CIRCLE_RADIUS = 50;
+const TOTAL_L1_ENEMY_COUNT = 4;
 
 // starting the canvas and making the framerate 60fps
 
@@ -43,6 +48,8 @@ const updateCanvas = () => {
   ctx.drawImage(PLAYER_IMAGE, playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
   movePlayer();
   drawProjectiles();
+  moveL1Enemies();
+  renderL1Enemies();
 };
 
 const movePlayer = () => {
@@ -61,19 +68,48 @@ const movePlayer = () => {
   }
 };
 
-const spawnL1Enemies = () => {
-  if (basicEnemyNumber < 4) {
-    basicEnemyArray.push(new Enemy(enemySpawnX, enemySpawnY));
-    basicEnemyNumber++;
-  }
+const spawnNewEnemy = () => {
+  basicEnemyArray.push(
+    new Enemy(
+      L1_ENEMY_SPAWN_X,
+      L1_ENEMY_SPAWN_Y + L1_ENEMY_CIRCLE_RADIUS,
+      BASIC_ENEMY_HEIGHT,
+      BASIC_ENEMY_WIDTH,
+      0
+    )
+  );
+};
+
+const moveL1Enemies = () => {
   for (const enemy of basicEnemyArray) {
-    ctx.drawImage(BASIC_ENEMY_IMAGE, enemySpawnX, enemySpawnY);
+    enemy.pos += 0.02;
+    enemy.x = -Math.sin(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_X;
+    enemy.y = Math.cos(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_Y;
+  }
+
+  const lastEnemy = basicEnemyArray.at(-1);
+  if (
+    lastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
+    basicEnemyArray.length < 4
+  ) {
+    spawnNewEnemy();
+  }
+};
+
+const renderL1Enemies = () => {
+  for (const enemy of basicEnemyArray) {
+    ctx.drawImage(
+      BASIC_ENEMY_IMAGE,
+      enemy.x,
+      enemy.y,
+      BASIC_ENEMY_HEIGHT,
+      BASIC_ENEMY_WIDTH
+    );
   }
 };
 
 const drawProjectiles = () => {
   for (const projectile of projectileArray) {
-    console.log(projectile);
     ctx.drawImage(
       PROJ_IMAGE,
       projectile.x,
@@ -106,6 +142,29 @@ const keyUp = (keyboardEvent) => {
 
 window.addEventListener("keyup", keyUp);
 
+const basicEnemyHit = () => {
+  let projHitLeft = projectile.x;
+  let projHitTop = projectile.y;
+  let projHitBottom = projectile.y + BASIC_ENEMY_HEIGHT;
+  let projHitRight = projectile.x + BASIC_ENEMY_WIDTH;
+
+  let enemyHitLeft = enemy.x;
+  let enemyHitTop = enemy.y;
+  let enemyHitBottom = enemy.y + BASIC_ENEMY_HEIGHT;
+  let enemyHitRight = enemy.x + BASIC_ENEMY_WIDTH;
+
+  if (
+    projHitRight > enemyHitLeft &&
+    projHitLeft < enemyHitRight &&
+    projHitTop < enemyHitBottom &&
+    projHitBottom > enemyHitTop
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 class Projectile {
   constructor(x, y) {
     this.x = x;
@@ -117,12 +176,14 @@ class Projectile {
 }
 
 class Enemy {
-  constructor(x, y) {
+  constructor(x, y, width, height, pos) {
     this.x = x;
     this.y = y;
+    this.pos = pos;
   }
 }
 
 // taking the info from the keyPressed function and using it to move the player
 
 startCanvas();
+spawnNewEnemy();
