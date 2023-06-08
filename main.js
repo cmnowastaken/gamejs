@@ -30,6 +30,7 @@ const BASIC_ENEMY_HEIGHT = 30;
 const BASIC_ENEMY_WIDTH = 30;
 const L1_ENEMY_CIRCLE_RADIUS = 50;
 const TOTAL_L1_ENEMY_COUNT = 4;
+let L1EnemiesSpawned = 0;
 
 // starting the canvas and making the framerate 60fps
 
@@ -71,6 +72,7 @@ const movePlayer = () => {
 };
 
 const spawnNewEnemy = () => {
+  if (L1EnemiesSpawned > TOTAL_L1_ENEMY_COUNT) return;
   basicEnemyArray.push(
     new Enemy(
       L1_ENEMY_SPAWN_X,
@@ -80,6 +82,7 @@ const spawnNewEnemy = () => {
       0
     )
   );
+  L1EnemiesSpawned++;
 };
 
 const moveL1Enemies = () => {
@@ -87,6 +90,8 @@ const moveL1Enemies = () => {
     enemy.pos += 0.02;
     enemy.x = -Math.sin(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_X;
     enemy.y = Math.cos(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_Y;
+    if (enemy.x == 249) {
+    }
   }
 
   const lastEnemy = basicEnemyArray.at(-1);
@@ -120,6 +125,19 @@ const drawProjectiles = () => {
       PROJ_HEIGHT
     );
     projectile.y -= PROJ_SPEED;
+  }
+};
+
+const drawL1EnemyProjectiles = () => {
+  for (const projectile of enemyProjectileArray) {
+    ctx.drawImage(
+      ENEMY_PROJ_IMAGE,
+      projectile.x,
+      projectile.y,
+      PROJ_WIDTH,
+      PROJ_HEIGHT
+    );
+    projectile.y += PROJ_SPEED;
   }
 };
 
@@ -192,6 +210,34 @@ class Enemy {
     this.pos = pos;
     this.height = height;
     this.width = width;
+  }
+}
+
+class Player {
+  constructor(x, y, width, height, pos) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.pos = pos;
+  }
+}
+
+class L1EnemyProjectile {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  moveL1EnemyProjectile() {
+    this.y += PROJ_SPEED;
+  }
+  checkPlayerCollision(player) {
+    return (
+      this.x > player.x &&
+      this.x < player.x + player.width &&
+      this.y > player.y &&
+      this.y < player.y + player.height
+    );
   }
 }
 
