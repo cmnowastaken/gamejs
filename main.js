@@ -1,36 +1,35 @@
 // Name: Εlliott Bell
-// Date: 23/5/23
-// Iteration 2
+// Game: Cosmos Intruders
 
 // Declaring the variables that will be used
 
 let ctx;
-const CANVASWIDTH = 500;
+const CANVASWIDTH = 500; // setting the canvas width and height
 const CANVASHEIGHT = 500;
-const PLAYER_WIDTH = 35;
+const PLAYER_WIDTH = 35; // setting player width and height
 const PLAYER_HEIGHT = 35;
-const PLAYER_IMAGE = new Image();
+const PLAYER_IMAGE = new Image(); // setting the images that will be used in the game
 PLAYER_IMAGE.src = "ship_v1.png";
 const PROJ_IMAGE = new Image();
 PROJ_IMAGE.src = "bullet.png";
 const BASIC_ENEMY_IMAGE = new Image();
 BASIC_ENEMY_IMAGE.src = "enemyshipdefault.png";
-const PROJ_WIDTH = 5;
+const PROJ_WIDTH = 5; //projectile sizing and speed
 const PROJ_HEIGHT = 10;
 const PROJ_SPEED = 5;
-let playerX = CANVASWIDTH / 2;
+let playerX = CANVASWIDTH / 2; // setting player x and y position
 let playerY = CANVASHEIGHT - 50;
-let projY = playerY;
-let projectileArray = [];
-const keysPressed = {};
-let basicEnemyArray = [];
-const L1_ENEMY_SPAWN_X = 250;
+let projY = playerY; // original projectile position
+let projectileArray = []; // the array of projectiles that will be pushed to and removed from when space is pressed
+const keysPressed = {}; // logging which keys are pressed
+let basicEnemyArray = []; // setting the array of enemies
+const L1_ENEMY_SPAWN_X = 250; // setting the original enemy spawn positions
 const L1_ENEMY_SPAWN_Y = 150;
-const BASIC_ENEMY_HEIGHT = 30;
+const BASIC_ENEMY_HEIGHT = 30; // basic enemy sizing
 const BASIC_ENEMY_WIDTH = 30;
-const L1_ENEMY_CIRCLE_RADIUS = 50;
-const TOTAL_L1_ENEMY_COUNT = 4;
-let L1EnemiesSpawned = 0;
+const L1_ENEMY_CIRCLE_RADIUS = 50; // sizing the circle which the enemies spin around
+const TOTAL_L1_ENEMY_COUNT = 4; // setting the total number of enemies in the first level
+let L1EnemiesSpawned = 0; // this variable increases as more enemies are pushed to the array
 
 // starting the canvas and making the framerate 60fps
 
@@ -40,7 +39,7 @@ const startCanvas = () => {
   timer = setInterval(updateCanvas, 1000 / 60);
 };
 
-// drawing the player and background 60 times/second in order to make smooth movement
+// drawing the various graphics and background as well as calling functions 60 times/second in order to make smooth movement
 
 const updateCanvas = () => {
   ctx.fillStyle = "black";
@@ -55,15 +54,20 @@ const updateCanvas = () => {
   removeRedundantProjectiles();
 };
 
+// this function is to move the player using the keysPressed variable
+
 const movePlayer = () => {
-  const playerSpeed = Math.PI / (Math.PI / 2); // lol
+  const playerSpeed = Math.PI / (Math.PI / 2); // setting player speed to 2
   if (keysPressed["a"]) {
+    // making the player move left when A is pressed
     playerX -= playerSpeed;
     if (playerX < -PLAYER_WIDTH / 2) {
+      // making the player wrap around the screen
       playerX = CANVASWIDTH - PLAYER_WIDTH / 2;
     }
   }
   if (keysPressed["d"]) {
+    // ensuring the player moves right when D is pressed
     playerX += playerSpeed;
     if (playerX > CANVASWIDTH - PLAYER_WIDTH / 2) {
       playerX = -PLAYER_WIDTH / 2;
@@ -87,7 +91,7 @@ const spawnNewEnemy = () => {
 
 const moveL1Enemies = () => {
   for (const enemy of basicEnemyArray) {
-    enemy.pos += 0.02;
+    enemy.pos += 0.03;
     enemy.x = -Math.sin(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_X;
     enemy.y = Math.cos(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_Y;
     if (enemy.x == 249) {
