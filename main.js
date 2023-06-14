@@ -14,6 +14,8 @@ const PROJ_IMAGE = new Image();
 PROJ_IMAGE.src = "bullet.png";
 const BASIC_ENEMY_IMAGE = new Image();
 BASIC_ENEMY_IMAGE.src = "enemyshipdefault.png";
+const HEART_IMAGE = new Image();
+HEART_IMAGE.src = "playerheart.png";
 const PROJ_WIDTH = 5; //projectile sizing and speed
 const PROJ_HEIGHT = 10;
 const PROJ_SPEED = 5;
@@ -22,7 +24,7 @@ let playerY = CANVASHEIGHT - 50;
 let projY = playerY; // original projectile position
 let projectileArray = []; // the array of projectiles that will be pushed to and removed from when space is pressed
 const keysPressed = {}; // logging which keys are pressed
-let basicEnemyArray = []; // setting the array of enemies
+let L1EnemyArray = []; // setting the array of enemies
 const L1_ENEMY_SPAWN_X = 250; // setting the original enemy spawn positions
 const L1_ENEMY_SPAWN_Y = 150;
 const BASIC_ENEMY_HEIGHT = 30; // basic enemy sizing
@@ -30,6 +32,8 @@ const BASIC_ENEMY_WIDTH = 30;
 const L1_ENEMY_CIRCLE_RADIUS = 50; // sizing the circle which the enemies spin around
 const TOTAL_L1_ENEMY_COUNT = 4; // setting the total number of enemies in the first level
 let L1EnemiesSpawned = 0; // this variable increases as more enemies are pushed to the array
+// let hearts = 5;
+let enemyProjectileArray = [];
 
 // starting the canvas and making the framerate 60fps
 
@@ -76,8 +80,8 @@ const movePlayer = () => {
 };
 
 const spawnNewEnemy = () => {
-  if (L1EnemiesSpawned > TOTAL_L1_ENEMY_COUNT) return;
-  basicEnemyArray.push(
+  if (L1EnemiesSpawned >= TOTAL_L1_ENEMY_COUNT) return;
+  L1EnemyArray.push(
     new Enemy(
       L1_ENEMY_SPAWN_X,
       L1_ENEMY_SPAWN_Y + L1_ENEMY_CIRCLE_RADIUS,
@@ -90,25 +94,31 @@ const spawnNewEnemy = () => {
 };
 
 const moveL1Enemies = () => {
-  for (const enemy of basicEnemyArray) {
+  for (const enemy of L1EnemyArray) {
     enemy.pos += 0.03;
     enemy.x = -Math.sin(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_X;
     enemy.y = Math.cos(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_Y;
-    if (enemy.x == 249) {
+    if (enemy.y <= 249) {
+      enemyProjectileArray.push(
+        new Projectile(
+          enemy.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
+          enemy.y
+        )
+      );
     }
   }
 
-  const lastEnemy = basicEnemyArray.at(-1);
+  const lastEnemy = L1EnemyArray.at(-1);
   if (
     lastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
-    basicEnemyArray.length < 4
+    L1EnemyArray.length < 4
   ) {
     spawnNewEnemy();
   }
 };
 
 const renderL1Enemies = () => {
-  for (const enemy of basicEnemyArray) {
+  for (const enemy of L1EnemyArray) {
     ctx.drawImage(
       BASIC_ENEMY_IMAGE,
       enemy.x,
@@ -168,11 +178,25 @@ window.addEventListener("keyup", keyUp);
 
 const basicEnemyHit = () => {
   for (const projectile of projectileArray) {
-    for (const enemy of basicEnemyArray) {
+    for (const enemy of L1EnemyArray) {
       if (projectile.checkEnemyCollision(enemy)) {
         const projIndex = projectileArray.indexOf(projectile);
-        const enemyIndex = basicEnemyArray.indexOf(enemy);
-        basicEnemyArray.splice(enemyIndex, 1);
+        const enemyIndex = L1EnemyArray.indexOf(enemy);
+        L1EnemyArray.splice(enemyIndex, 1);
+        projectileArray.splice(projIndex, 1);
+      }
+      // die
+    }
+  }
+};
+
+const playerHit = () => {
+  for (const projectile of projectileArray) {
+    for (const enemy of L1EnemyArray) {
+      if (projectile.checkPlayerCollision(player)) {
+        const projIndex = projectileArray.indexOf(projectile);
+        const enemyIndex = L1EnemyArray.indexOf(enemy);
+        L1EnemyArray.splice(enemyIndex, 1);
         projectileArray.splice(projIndex, 1);
       }
       // die
@@ -244,8 +268,6 @@ class L1EnemyProjectile {
     );
   }
 }
-
-// taking the info from the keyPressed function and using it to move the player
 
 startCanvas();
 spawnNewEnemy();
