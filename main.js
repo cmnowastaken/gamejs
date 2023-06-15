@@ -6,8 +6,10 @@
 let ctx;
 const CANVASWIDTH = 500; // setting the canvas width and height
 const CANVASHEIGHT = 500;
+
 const PLAYER_WIDTH = 35; // setting player width and height
 const PLAYER_HEIGHT = 35;
+
 const PLAYER_IMAGE = new Image(); // setting the images that will be used in the game
 PLAYER_IMAGE.src = "ship_v1.png";
 const PROJ_IMAGE = new Image();
@@ -16,11 +18,16 @@ const BASIC_ENEMY_IMAGE = new Image();
 BASIC_ENEMY_IMAGE.src = "enemyshipdefault.png";
 const HEART_IMAGE = new Image();
 HEART_IMAGE.src = "playerheart.png";
+const ENEMY_PROJ_IMAGE = new Image();
+ENEMY_PROJ_IMAGE.src = "enemybullet.png";
+
 const PROJ_WIDTH = 5; //projectile sizing and speed
 const PROJ_HEIGHT = 10;
 const PROJ_SPEED = 5;
+
 let playerX = CANVASWIDTH / 2; // setting player x and y position
 let playerY = CANVASHEIGHT - 50;
+
 let projY = playerY; // original projectile position
 let projectileArray = []; // the array of projectiles that will be pushed to and removed from when space is pressed
 const keysPressed = {}; // logging which keys are pressed
@@ -56,6 +63,8 @@ const updateCanvas = () => {
   renderL1Enemies();
   basicEnemyHit();
   removeRedundantProjectiles();
+  drawL1EnemyProjectiles();
+  moveL1EnemyProjectiles();
 };
 
 // this function is to move the player using the keysPressed variable
@@ -98,9 +107,9 @@ const moveL1Enemies = () => {
     enemy.pos += 0.03;
     enemy.x = -Math.sin(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_X;
     enemy.y = Math.cos(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_Y;
-    if (enemy.y <= 249) {
+    if (enemy.y >= 230 - BASIC_ENEMY_HEIGHT) {
       enemyProjectileArray.push(
-        new Projectile(
+        new L1EnemyProjectile(
           enemy.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
           enemy.y
         )
@@ -151,10 +160,14 @@ const drawL1EnemyProjectiles = () => {
       PROJ_WIDTH,
       PROJ_HEIGHT
     );
-    projectile.y += PROJ_SPEED;
   }
 };
 
+const moveL1EnemyProjectiles = () => {
+  for (const projectile of enemyProjectileArray) {
+    projectile.moveL1EnemyProjectile();
+  }
+};
 // logging which keys were pressed in order to move or shoot projectiles
 
 const keyPressed = (keyboardEvent) => {
