@@ -4,6 +4,7 @@
 // Declaring the variables that will be used
 
 let ctx;
+let player;
 const CANVASWIDTH = 500; // setting the canvas width and height
 const CANVASHEIGHT = 500;
 
@@ -39,7 +40,7 @@ const BASIC_ENEMY_WIDTH = 30;
 const L1_ENEMY_CIRCLE_RADIUS = 50; // sizing the circle which the enemies spin around
 const TOTAL_L1_ENEMY_COUNT = 4; // setting the total number of enemies in the first level
 let L1EnemiesSpawned = 0; // this variable increases as more enemies are pushed to the array
-// let hearts = 5;
+let hearts = 5;
 let enemyProjectileArray = [];
 
 // starting the canvas and making the framerate 60fps
@@ -47,6 +48,15 @@ let enemyProjectileArray = [];
 const startCanvas = () => {
   ctx = document.getElementById("canvas").getContext("2d");
   console.log("canvas started");
+  player = new Player(
+    PLAYER_IMAGE,
+    playerX,
+    playerY,
+    PLAYER_WIDTH,
+    PLAYER_HEIGHT,
+    0
+  );
+
   timer = setInterval(updateCanvas, 1000 / 60);
 };
 
@@ -56,7 +66,6 @@ const updateCanvas = () => {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, CANVASWIDTH, CANVASHEIGHT);
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(PLAYER_IMAGE, playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
   movePlayer();
   drawProjectiles();
   moveL1Enemies();
@@ -65,6 +74,12 @@ const updateCanvas = () => {
   removeRedundantProjectiles();
   drawL1EnemyProjectiles();
   moveL1EnemyProjectiles();
+  playerHit();
+  drawPlayer();
+};
+
+const drawPlayer = () => {
+  ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
 };
 
 // this function is to move the player using the keysPressed variable
@@ -73,17 +88,17 @@ const movePlayer = () => {
   const playerSpeed = Math.PI / (Math.PI / 2); // setting player speed to 2
   if (keysPressed["a"]) {
     // making the player move left when A is pressed
-    playerX -= playerSpeed;
-    if (playerX < -PLAYER_WIDTH / 2) {
+    player.x -= playerSpeed;
+    if (player.x < -PLAYER_WIDTH / 2) {
       // making the player wrap around the screen
-      playerX = CANVASWIDTH - PLAYER_WIDTH / 2;
+      player.x = CANVASWIDTH - PLAYER_WIDTH / 2;
     }
   }
   if (keysPressed["d"]) {
     // ensuring the player moves right when D is pressed
-    playerX += playerSpeed;
-    if (playerX > CANVASWIDTH - PLAYER_WIDTH / 2) {
-      playerX = -PLAYER_WIDTH / 2;
+    player.x += playerSpeed;
+    if (player.x > CANVASWIDTH - PLAYER_WIDTH / 2) {
+      player.x = -PLAYER_WIDTH / 2;
     }
   }
 };
@@ -107,7 +122,7 @@ const moveL1Enemies = () => {
     enemy.pos += 0.03;
     enemy.x = -Math.sin(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_X;
     enemy.y = Math.cos(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_Y;
-    if (enemy.y >= 230 - BASIC_ENEMY_HEIGHT) {
+    if (1 == 1) {
       enemyProjectileArray.push(
         new L1EnemyProjectile(
           enemy.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
@@ -182,7 +197,7 @@ const keyUp = (keyboardEvent) => {
   delete keysPressed[keyboardEvent.key];
   if (keyboardEvent.key == " ") {
     projectileArray.push(
-      new Projectile(playerX + PLAYER_WIDTH / 2 - PROJ_WIDTH / 2, playerY)
+      new Projectile(player.x + PLAYER_WIDTH / 2 - PROJ_WIDTH / 2, player.y)
     );
   }
 };
@@ -204,16 +219,14 @@ const basicEnemyHit = () => {
 };
 
 const playerHit = () => {
-  for (const projectile of projectileArray) {
-    for (const enemy of L1EnemyArray) {
-      if (projectile.checkPlayerCollision(player)) {
-        const projIndex = projectileArray.indexOf(projectile);
-        const enemyIndex = L1EnemyArray.indexOf(enemy);
-        L1EnemyArray.splice(enemyIndex, 1);
-        projectileArray.splice(projIndex, 1);
-      }
-      // die
+  for (const L1EnemyProjectile of enemyProjectileArray) {
+    if (L1EnemyProjectile.checkPlayerCollision(player)) {
+      const enemyProjIndex = enemyProjectileArray.indexOf(L1EnemyProjectile);
+      enemyProjectileArray.splice(enemyProjIndex, 1);
+      hearts--;
+      console.log(hearts);
     }
+    // die
   }
 };
 
@@ -255,7 +268,8 @@ class Enemy {
 }
 
 class Player {
-  constructor(x, y, width, height, pos) {
+  constructor(image, x, y, width, height, pos) {
+    this.image = image;
     this.x = x;
     this.y = y;
     this.width = width;
