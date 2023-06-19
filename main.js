@@ -57,6 +57,10 @@ const startCanvas = () => {
     0
   );
 
+  for (let i = 0; i < TOTAL_L1_ENEMY_COUNT; i++) {
+    spawnNewEnemy();
+  }
+
   timer = setInterval(updateCanvas, 1000 / 60);
 };
 
@@ -76,6 +80,15 @@ const updateCanvas = () => {
   moveL1EnemyProjectiles();
   playerHit();
   drawPlayer();
+
+  const lastEnemy = L1EnemyArray.at(-1);
+  if (
+    lastEnemy &&
+    lastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
+    L1EnemyArray.length < 4
+  ) {
+    spawnNewEnemy();
+  }
 };
 
 const drawPlayer = () => {
@@ -105,13 +118,15 @@ const movePlayer = () => {
 
 const spawnNewEnemy = () => {
   if (L1EnemiesSpawned >= TOTAL_L1_ENEMY_COUNT) return;
+  const initialPos = ((2 * Math.PI) / TOTAL_L1_ENEMY_COUNT) * L1EnemiesSpawned;
+
   L1EnemyArray.push(
     new Enemy(
       L1_ENEMY_SPAWN_X,
       L1_ENEMY_SPAWN_Y + L1_ENEMY_CIRCLE_RADIUS,
       BASIC_ENEMY_HEIGHT,
       BASIC_ENEMY_WIDTH,
-      0
+      initialPos
     )
   );
   L1EnemiesSpawned++;
@@ -122,22 +137,7 @@ const moveL1Enemies = () => {
     enemy.pos += 0.03;
     enemy.x = -Math.sin(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_X;
     enemy.y = Math.cos(enemy.pos) * L1_ENEMY_CIRCLE_RADIUS + L1_ENEMY_SPAWN_Y;
-    if (1 == 1) {
-      enemyProjectileArray.push(
-        new L1EnemyProjectile(
-          enemy.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
-          enemy.y
-        )
-      );
-    }
-  }
-
-  const lastEnemy = L1EnemyArray.at(-1);
-  if (
-    lastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
-    L1EnemyArray.length < 4
-  ) {
-    spawnNewEnemy();
+    enemy.tryShoot();
   }
 };
 
@@ -212,8 +212,7 @@ const basicEnemyHit = () => {
         const enemyIndex = L1EnemyArray.indexOf(enemy);
         L1EnemyArray.splice(enemyIndex, 1);
         projectileArray.splice(projIndex, 1);
-      }
-      // die
+      } // die
     }
   }
 };
@@ -225,8 +224,7 @@ const playerHit = () => {
       enemyProjectileArray.splice(enemyProjIndex, 1);
       hearts--;
       console.log(hearts);
-    }
-    // die
+    } // die
   }
 };
 
@@ -264,6 +262,22 @@ class Enemy {
     this.pos = pos;
     this.height = height;
     this.width = width;
+    this.canShoot = true;
+  }
+  tryShoot() {
+    if (!this.canShoot) return;
+    enemyProjectileArray.push(
+      new L1EnemyProjectile(
+        this.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
+        this.y
+      )
+    );
+
+    this.canShoot = false; // Prevents further shooting
+    const shootingDelay = Math.floor(Math.random() * 2000) + 1000;
+    setTimeout(() => {
+      this.canShoot = true;
+    }, shootingDelay);
   }
 }
 
