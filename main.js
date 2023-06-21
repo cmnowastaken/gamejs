@@ -8,9 +8,6 @@ let player;
 const CANVASWIDTH = 500; // setting the canvas width and height
 const CANVASHEIGHT = 500;
 
-const PLAYER_WIDTH = 35; // setting player width and height
-const PLAYER_HEIGHT = 35;
-
 const PLAYER_IMAGE = new Image(); // setting the images that will be used in the game
 PLAYER_IMAGE.src = "ship_v1.png";
 const PROJ_IMAGE = new Image();
@@ -28,6 +25,15 @@ const PROJ_SPEED = 5;
 
 let playerX = CANVASWIDTH / 2; // setting player x and y position
 let playerY = CANVASHEIGHT - 50;
+
+const PLAYER_WIDTH = 35; // setting player width and height
+const PLAYER_HEIGHT = 35;
+
+const HEART_WIDTH = 25; // setting heart width and height
+const HEART_HEIGHT = 25;
+
+let heartX = CANVASWIDTH - 40;
+const HEART_Y = 40 - HEART_HEIGHT;
 
 let projY = playerY; // original projectile position
 let projectileArray = []; // the array of projectiles that will be pushed to and removed from when space is pressed
@@ -80,6 +86,7 @@ const updateCanvas = () => {
   moveL1EnemyProjectiles();
   playerHit();
   drawPlayer();
+  heartFunction();
 
   const lastEnemy = L1EnemyArray.at(-1);
   if (
@@ -88,6 +95,22 @@ const updateCanvas = () => {
     L1EnemyArray.length < 4
   ) {
     spawnNewEnemy();
+  }
+
+  if (hearts <= 0) {
+    ctx.fillStyle = "black";
+    ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+    clearInterval(timer);
+    ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+    ctx.fillStyle = "white";
+    ctx.font = "40px system-ui";
+    ctx.fillText("Game over", CANVASWIDTH / 2 - 200, CANVASHEIGHT / 2 - 40);
+    ctx.font = "20px system-ui";
+    ctx.fillText(
+      "Click to play again",
+      CANVASWIDTH / 2 - 200,
+      CANVASHEIGHT / 2
+    );
   }
 };
 
@@ -223,7 +246,6 @@ const playerHit = () => {
       const enemyProjIndex = enemyProjectileArray.indexOf(L1EnemyProjectile);
       enemyProjectileArray.splice(enemyProjIndex, 1);
       hearts--;
-      console.log(hearts);
     } // die
   }
 };
@@ -234,6 +256,18 @@ const removeRedundantProjectiles = () => {
       const projIndex = projectileArray.indexOf(projectile);
       projectileArray.splice(projIndex, 1);
     }
+  }
+};
+
+const heartFunction = () => {
+  for (let i = 0; i < hearts; i++) {
+    ctx.drawImage(
+      HEART_IMAGE,
+      heartX - i * 30,
+      HEART_Y,
+      HEART_WIDTH,
+      HEART_HEIGHT
+    );
   }
 };
 
