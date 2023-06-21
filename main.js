@@ -48,6 +48,7 @@ const TOTAL_L1_ENEMY_COUNT = 4; // setting the total number of enemies in the fi
 let L1EnemiesSpawned = 0; // this variable increases as more enemies are pushed to the array
 let hearts = 5;
 let enemyProjectileArray = [];
+let killPlayer = false;
 
 // starting the canvas and making the framerate 60fps
 
@@ -87,6 +88,9 @@ const updateCanvas = () => {
   playerHit();
   drawPlayer();
   heartFunction();
+  L1Passed();
+  L1Failed();
+  removePlayer();
 
   const lastEnemy = L1EnemyArray.at(-1);
   if (
@@ -96,26 +100,18 @@ const updateCanvas = () => {
   ) {
     spawnNewEnemy();
   }
-
-  if (hearts <= 0) {
-    ctx.fillStyle = "black";
-    ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
-    clearInterval(timer);
-    ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
-    ctx.fillStyle = "white";
-    ctx.font = "40px system-ui";
-    ctx.fillText("Game over", CANVASWIDTH / 2 - 200, CANVASHEIGHT / 2 - 40);
-    ctx.font = "20px system-ui";
-    ctx.fillText(
-      "Click to play again",
-      CANVASWIDTH / 2 - 200,
-      CANVASHEIGHT / 2
-    );
-  }
 };
 
 const drawPlayer = () => {
-  ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
+  if (!killPlayer) {
+    ctx.drawImage(
+      player.image,
+      player.x,
+      player.y,
+      player.width,
+      player.height
+    );
+  }
 };
 
 // this function is to move the player using the keysPressed variable
@@ -268,6 +264,52 @@ const heartFunction = () => {
       HEART_WIDTH,
       HEART_HEIGHT
     );
+  }
+};
+
+const L1Passed = () => {
+  if (hearts > 0 && L1EnemyArray.length <= 0) {
+    setTimeout(() => {
+      ctx.fillStyle = "black";
+      ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      clearInterval(timer);
+      ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      ctx.fillStyle = "white";
+      ctx.font = "40px system-ui";
+      ctx.fillText("Level 2", CANVASWIDTH / 2 - 200, CANVASHEIGHT / 2 - 40);
+      ctx.font = "20px system-ui";
+      ctx.fillText(
+        "Click to continue",
+        CANVASWIDTH / 2 - 200,
+        CANVASHEIGHT / 2
+      );
+    }, 2000);
+  }
+};
+
+const L1Failed = () => {
+  if (hearts <= 0) {
+    setTimeout(() => {
+      ctx.fillStyle = "black";
+      ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      clearInterval(timer);
+      ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      ctx.fillStyle = "white";
+      ctx.font = "40px system-ui";
+      ctx.fillText("Game over", CANVASWIDTH / 2 - 200, CANVASHEIGHT / 2 - 40);
+      ctx.font = "20px system-ui";
+      ctx.fillText(
+        "Click to return to main menu",
+        CANVASWIDTH / 2 - 200,
+        CANVASHEIGHT / 2
+      );
+    }, 2000);
+  }
+};
+
+const removePlayer = () => {
+  if (hearts <= 0) {
+    killPlayer = true;
   }
 };
 
