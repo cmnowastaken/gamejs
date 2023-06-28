@@ -46,8 +46,8 @@ const BASIC_ENEMY_WIDTH = 30;
 const L1_ENEMY_CIRCLE_RADIUS = 50; // sizing the circle which the enemies spin around
 const TOTAL_L1_ENEMY_COUNT = 4; // setting the total number of enemies in the first level
 let L1EnemiesSpawned = 0; // this variable increases as more enemies are pushed to the array
-let hearts = 5;
 let enemyProjectileArray = [];
+let hearts = 5;
 let killPlayer = false;
 
 // starting the canvas and making the framerate 60fps
@@ -55,6 +55,28 @@ let killPlayer = false;
 const startCanvas = () => {
   ctx = document.getElementById("canvas").getContext("2d");
   console.log("canvas started");
+  drawStartScreen();
+  killPlayer = false;
+};
+
+const drawStartScreen = () => {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, CANVASWIDTH, CANVASHEIGHT);
+  ctx.fillStyle = "white";
+  ctx.font = "40px system-ui";
+  ctx.fillText(
+    "Cosmos Intruders",
+    CANVASWIDTH / 2 - 150, // the start of the text will be 150 px left of the center of the canvas
+    CANVASHEIGHT / 2 - 40
+  );
+  ctx.font = "20px system-ui";
+  ctx.fillText("Click to Start", CANVASWIDTH / 2 - 50, CANVASHEIGHT / 2);
+};
+
+const startGame = () => {
+  const canvas = document.getElementById("canvas");
+  canvas.removeEventListener("click", startGame); // Remove the click event listener
+
   player = new Player(
     PLAYER_IMAGE,
     playerX,
@@ -299,12 +321,18 @@ const L1Failed = () => {
       ctx.fillText("Game over", CANVASWIDTH / 2 - 200, CANVASHEIGHT / 2 - 40);
       ctx.font = "20px system-ui";
       ctx.fillText(
-        "Click to return to main menu",
+        "Click anywhere to return to main menu",
         CANVASWIDTH / 2 - 200,
         CANVASHEIGHT / 2
       );
     }, 2000);
   }
+  const canvas = document.getElementById("canvas");
+  let onClick = () => {
+    startCanvas();
+    canvas.removeEventListener("click", onClick);
+  };
+  canvas.addEventListener("click", onClick);
 };
 
 const removePlayer = () => {
@@ -350,7 +378,7 @@ class Enemy {
     );
 
     this.canShoot = false; // Prevents further shooting
-    const shootingDelay = Math.floor(Math.random() * 2000) + 1000;
+    const shootingDelay = Math.floor(Math.random() * 4000) + 1000;
     setTimeout(() => {
       this.canShoot = true;
     }, shootingDelay);
@@ -388,3 +416,5 @@ class L1EnemyProjectile {
 
 startCanvas();
 spawnNewEnemy();
+
+canvas.addEventListener("click", startGame);
