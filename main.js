@@ -49,8 +49,9 @@ let L1EnemiesSpawned = 0; // this variable increases as more enemies are pushed 
 let enemyProjectileArray = [];
 let hearts = 5;
 let killPlayer = false;
+let screenName;
 
-// starting the canvas and making the framerate 60fps
+// starting the canvas, calling my function which makes the start screen, and making sure the player will not be dead (this boolean turns true when the hearts = 0)
 
 const startCanvas = () => {
   ctx = document.getElementById("canvas").getContext("2d");
@@ -58,6 +59,8 @@ const startCanvas = () => {
   drawStartScreen();
   killPlayer = false;
 };
+
+// starts the screen
 
 const drawStartScreen = () => {
   ctx.fillStyle = "black";
@@ -71,12 +74,10 @@ const drawStartScreen = () => {
   );
   ctx.font = "20px system-ui";
   ctx.fillText("Click to Start", CANVASWIDTH / 2 - 50, CANVASHEIGHT / 2);
+  screenName = "startScreen";
 };
 
 const startGame = () => {
-  const canvas = document.getElementById("canvas");
-  canvas.removeEventListener("click", startGame); // Remove the click event listener
-
   player = new Player(
     PLAYER_IMAGE,
     playerX,
@@ -171,6 +172,20 @@ const spawnNewEnemy = () => {
     )
   );
   L1EnemiesSpawned++;
+};
+
+const handleClicks = () => {
+  if (screenName == "startScreen") {
+    startGame;
+  } else if (screenName == "gameOver") {
+    drawStartScreen;
+  } else if (screenName == "level1Completed") {
+    startLevel2;
+  } else if (screenName == "level2Completed") {
+    startLevel3;
+  } else if (screenName == "level3Completed") {
+    startLevel4;
+  }
 };
 
 const moveL1Enemies = () => {
@@ -327,12 +342,6 @@ const L1Failed = () => {
       );
     }, 2000);
   }
-  const canvas = document.getElementById("canvas");
-  let onClick = () => {
-    startCanvas();
-    canvas.removeEventListener("click", onClick);
-  };
-  canvas.addEventListener("click", onClick);
 };
 
 const removePlayer = () => {
@@ -417,4 +426,4 @@ class L1EnemyProjectile {
 startCanvas();
 spawnNewEnemy();
 
-canvas.addEventListener("click", startGame);
+canvas.addEventListener("click", handleClicks);
