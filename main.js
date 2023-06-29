@@ -50,6 +50,9 @@ let enemyProjectileArray = [];
 let hearts = 5;
 let killPlayer = false;
 let screenName;
+let L2EnemyArray = [];
+const TOTAL_L2_ENEMY_COUNT = 5;
+let L2EnemiesSpawned = 0;
 
 // starting the canvas, calling my function which makes the start screen, and making sure the player will not be dead (this boolean turns true when the hearts = 0)
 
@@ -60,6 +63,19 @@ const startCanvas = () => {
   killPlayer = false;
 };
 
+const handleClicks = () => {
+  if (screenName == "startScreen") {
+    startGame();
+  } else if (screenName == "gameOver") {
+    drawStartScreen();
+  } else if (screenName == "level1Completed") {
+    startLevel2();
+  } else if (screenName == "level2Completed") {
+    startLevel3();
+  } else if (screenName == "level3Completed") {
+    startLevel4();
+  }
+};
 // starts the screen
 
 const drawStartScreen = () => {
@@ -75,6 +91,8 @@ const drawStartScreen = () => {
   ctx.font = "20px system-ui";
   ctx.fillText("Click to Start", CANVASWIDTH / 2 - 50, CANVASHEIGHT / 2);
   screenName = "startScreen";
+  hearts = 5;
+  killPlayer = false;
 };
 
 const startGame = () => {
@@ -92,6 +110,7 @@ const startGame = () => {
   }
 
   timer = setInterval(updateCanvas, 1000 / 60);
+  screenName = "level1";
 };
 
 // drawing the various graphics and background as well as calling functions 60 times/second in order to make smooth movement
@@ -115,10 +134,10 @@ const updateCanvas = () => {
   L1Failed();
   removePlayer();
 
-  const lastEnemy = L1EnemyArray.at(-1);
+  const L1LastEnemy = L1EnemyArray.at(-1);
   if (
-    lastEnemy &&
-    lastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
+    L1LastEnemy &&
+    L1LastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
     L1EnemyArray.length < 4
   ) {
     spawnNewEnemy();
@@ -172,20 +191,6 @@ const spawnNewEnemy = () => {
     )
   );
   L1EnemiesSpawned++;
-};
-
-const handleClicks = () => {
-  if (screenName == "startScreen") {
-    startGame;
-  } else if (screenName == "gameOver") {
-    drawStartScreen;
-  } else if (screenName == "level1Completed") {
-    startLevel2;
-  } else if (screenName == "level2Completed") {
-    startLevel3;
-  } else if (screenName == "level3Completed") {
-    startLevel4;
-  }
 };
 
 const moveL1Enemies = () => {
@@ -313,13 +318,9 @@ const L1Passed = () => {
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
-      ctx.fillText("Level 2", CANVASWIDTH / 2 - 200, CANVASHEIGHT / 2 - 40);
+      ctx.fillText("Level 2", CANVASWIDTH / 2 - 59, CANVASHEIGHT / 2 - 40);
       ctx.font = "20px system-ui";
-      ctx.fillText(
-        "Click to continue",
-        CANVASWIDTH / 2 - 200,
-        CANVASHEIGHT / 2
-      );
+      ctx.fillText("Click to continue", CANVASWIDTH / 2, CANVASHEIGHT / 2);
     }, 2000);
   }
 };
@@ -330,14 +331,16 @@ const L1Failed = () => {
       ctx.fillStyle = "black";
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
+      screenName = "gameOver";
+      console.log(screenName);
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
-      ctx.fillText("Game over", CANVASWIDTH / 2 - 200, CANVASHEIGHT / 2 - 40);
+      ctx.fillText("Game over", CANVASWIDTH / 2 - 90, CANVASHEIGHT / 2 - 40);
       ctx.font = "20px system-ui";
       ctx.fillText(
         "Click anywhere to return to main menu",
-        CANVASWIDTH / 2 - 200,
+        CANVASWIDTH / 2 - 170,
         CANVASHEIGHT / 2
       );
     }, 2000);
