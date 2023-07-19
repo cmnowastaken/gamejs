@@ -18,6 +18,8 @@ const HEART_IMAGE = new Image();
 HEART_IMAGE.src = "playerheart.png";
 const ENEMY_PROJ_IMAGE = new Image();
 ENEMY_PROJ_IMAGE.src = "enemybullet.png";
+const BACKGROUND_IMAGE = new Image();
+BACKGROUND_IMAGE.src = "starbackground.png";
 
 const PROJ_WIDTH = 5;
 const PROJ_HEIGHT = 10;
@@ -96,7 +98,7 @@ const handleClicks = () => {
 
 const drawStartScreen = () => {
   ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, CANVASWIDTH, CANVASHEIGHT);
+  ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
   ctx.fillStyle = "white";
   ctx.font = "40px system-ui";
   ctx.fillText(
@@ -180,6 +182,9 @@ const startLevel3 = () => {
 };
 
 const startGame = () => {
+  L1EnemiesSpawned = 0;
+  L2EnemiesSpawned = 0;
+  L3EnemiesSpawned = 0;
   player = new Player(
     PLAYER_IMAGE,
     playerX,
@@ -539,6 +544,7 @@ const L1Passed = () => {
       ctx.fillStyle = "black";
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
+      screenName = "level1Completed";
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
@@ -546,7 +552,6 @@ const L1Passed = () => {
       ctx.font = "20px system-ui";
       ctx.fillText("Click to continue", CANVASWIDTH / 2 - 75, CANVASHEIGHT / 2);
     }, 2000);
-    screenName = "level1Completed";
   }
 };
 
@@ -556,13 +561,13 @@ const L2Passed = () => {
       ctx.fillStyle = "black";
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
+      screenName = "level2Completed";
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
       ctx.fillText("Level 3", CANVASWIDTH / 2 - 59, CANVASHEIGHT / 2 - 40);
       ctx.font = "20px system-ui";
       ctx.fillText("Click to continue", CANVASWIDTH / 2 - 75, CANVASHEIGHT / 2);
-      screenName = "level2Completed";
     }, 2000);
   }
 };
@@ -573,6 +578,7 @@ const L3Passed = () => {
       ctx.fillStyle = "black";
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
+      screenName = "gameOver";
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
@@ -587,7 +593,6 @@ const L3Passed = () => {
         CANVASWIDTH / 2 - 75,
         CANVASHEIGHT / 2
       );
-      screenName = "level3Completed";
     }, 2000);
   }
 };
