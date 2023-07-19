@@ -5,10 +5,10 @@
 
 let ctx;
 let player;
-const CANVASWIDTH = 500; // setting the canvas width and height
+const CANVASWIDTH = 500;
 const CANVASHEIGHT = 500;
 
-const PLAYER_IMAGE = new Image(); // setting the images that will be used in the game
+const PLAYER_IMAGE = new Image();
 PLAYER_IMAGE.src = "ship_v1.png";
 const PROJ_IMAGE = new Image();
 PROJ_IMAGE.src = "bullet.png";
@@ -19,41 +19,52 @@ HEART_IMAGE.src = "playerheart.png";
 const ENEMY_PROJ_IMAGE = new Image();
 ENEMY_PROJ_IMAGE.src = "enemybullet.png";
 
-const PROJ_WIDTH = 5; //projectile sizing and speed
+const PROJ_WIDTH = 5;
 const PROJ_HEIGHT = 10;
 const PROJ_SPEED = 5;
 
-let playerX = CANVASWIDTH / 2; // setting player x and y position
+let playerX = CANVASWIDTH / 2;
 let playerY = CANVASHEIGHT - 50;
 
-const PLAYER_WIDTH = 35; // setting player width and height
+const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 35;
 
-const HEART_WIDTH = 25; // setting heart width and height
+const HEART_WIDTH = 25;
 const HEART_HEIGHT = 25;
 
 let heartX = CANVASWIDTH - 40;
 const HEART_Y = 40 - HEART_HEIGHT;
 
-let projY = playerY; // original projectile position
-let projectileArray = []; // the array of projectiles that will be pushed to and removed from when space is pressed
-const keysPressed = {}; // logging which keys are pressed
-let L1EnemyArray = []; // setting the array of enemies
-const L1_ENEMY_SPAWN_X = 250; // setting the original enemy spawn positions
+let projY = playerY;
+let projectileArray = [];
+const keysPressed = {};
+let L1EnemyArray = [];
+const L1_ENEMY_SPAWN_X = 250;
 const L1_ENEMY_SPAWN_Y = 150;
-const BASIC_ENEMY_HEIGHT = 30; // basic enemy sizing
+const L1_ENEMY_CIRCLE_RADIUS = 50;
+
+const L2_ENEMY_SPAWN_X = 250;
+const L2_ENEMY_SPAWN_Y = 150;
+const L2_ENEMY_CIRCLE_RADIUS = 60;
+
+const BASIC_ENEMY_HEIGHT = 30;
 const BASIC_ENEMY_WIDTH = 30;
-const L1_ENEMY_CIRCLE_RADIUS = 50; // sizing the circle which the enemies spin around
-const TOTAL_L1_ENEMY_COUNT = 4; // setting the total number of enemies in the first level
-let L1EnemiesSpawned = 0; // this variable increases as more enemies are pushed to the array
+
+const TOTAL_L1_ENEMY_COUNT = 4;
+let L1EnemiesSpawned = 0;
 let enemyProjectileArray = [];
+let L2EnemyProjectileArray = [];
 let hearts = 5;
 let killPlayer = false;
 let screenName;
+
 let L2EnemyArray = [];
-const TOTAL_L2_ENEMY_COUNT = 5;
+const TOTAL_L2_ENEMY_COUNT = 6;
 let L2EnemiesSpawned = 0;
 
+let L3EnemyArray = [];
+const TOTAL_L3_ENEMY_COUNT = 6;
+let L3EnemiesSpawned = 0;
 // starting the canvas, calling my function which makes the start screen, and making sure the player will not be dead (this boolean turns true when the hearts = 0)
 
 const startCanvas = () => {
@@ -73,7 +84,7 @@ const handleClicks = () => {
   } else if (screenName == "level2Completed") {
     startLevel3();
   } else if (screenName == "level3Completed") {
-    startLevel4();
+    drawStartScreen();
   }
 };
 // starts the screen
@@ -93,6 +104,40 @@ const drawStartScreen = () => {
   screenName = "startScreen";
   hearts = 5;
   killPlayer = false;
+};
+
+const spawnNewEnemy2 = () => {
+  if (L2EnemiesSpawned >= TOTAL_L2_ENEMY_COUNT) return;
+  const initialPos = ((2 * Math.PI) / TOTAL_L2_ENEMY_COUNT) * L2EnemiesSpawned;
+
+  L2EnemyArray.push(
+    new Enemy(
+      L2_ENEMY_SPAWN_X,
+      L2_ENEMY_SPAWN_Y + L2_ENEMY_CIRCLE_RADIUS,
+      BASIC_ENEMY_HEIGHT,
+      BASIC_ENEMY_WIDTH,
+      initialPos
+    )
+  );
+  L2EnemiesSpawned++;
+};
+
+const startLevel2 = () => {
+  player = new Player(
+    PLAYER_IMAGE,
+    playerX,
+    playerY,
+    PLAYER_WIDTH,
+    PLAYER_HEIGHT,
+    0
+  );
+
+  for (let i = 0; i < TOTAL_L2_ENEMY_COUNT; i++) {
+    spawnNewEnemy2();
+  }
+
+  timer = setInterval(updateCanvas, 1000 / 60);
+  screenName = "level2";
 };
 
 const startGame = () => {
@@ -121,27 +166,51 @@ const updateCanvas = () => {
   ctx.imageSmoothingEnabled = false;
   movePlayer();
   drawProjectiles();
-  moveL1Enemies();
-  renderL1Enemies();
-  basicEnemyHit();
-  removeRedundantProjectiles();
-  drawL1EnemyProjectiles();
-  moveL1EnemyProjectiles();
-  playerHit();
   drawPlayer();
   heartFunction();
-  L1Passed();
-  L1Failed();
-  removePlayer();
+  removeRedundantProjectiles();
 
-  const L1LastEnemy = L1EnemyArray.at(-1);
-  if (
-    L1LastEnemy &&
-    L1LastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
-    L1EnemyArray.length < 4
-  ) {
-    spawnNewEnemy();
+  if (screenName == "level1") {
+    moveL1Enemies();
+    renderL1Enemies();
+    drawL1EnemyProjectiles();
+    moveL1EnemyProjectiles();
+    basicEnemyHit(L1EnemyArray);
+    L1PlayerHit();
+    L1Passed();
+    L1Failed();
+
+    const L1LastEnemy = L1EnemyArray.at(-1);
+    if (
+      L1LastEnemy &&
+      L1LastEnemy.pos >= (2 * Math.PI) / TOTAL_L1_ENEMY_COUNT &&
+      L1EnemyArray.length < 4
+    ) {
+      spawnNewEnemy();
+    }
+  } else if (screenName == "level2") {
+    moveL2Enemies();
+    renderL2Enemies();
+    drawL2EnemyProjectiles();
+    moveL2EnemyProjectiles();
+    basicEnemyHit(L2EnemyArray);
+    L2PlayerHit();
+    L2Passed();
+    L2Failed();
+
+    const L2LastEnemy = L2EnemyArray.at(-1);
+    if (
+      L2LastEnemy &&
+      L2LastEnemy.pos >= (2 * Math.PI) / TOTAL_L2_ENEMY_COUNT &&
+      L2EnemyArray.length < 5
+    ) {
+      spawnNewEnemy();
+    }
+  } else if (screenName == "level3") {
+    // similar logic for level 3
   }
+
+  removePlayer();
 };
 
 const drawPlayer = () => {
@@ -202,8 +271,29 @@ const moveL1Enemies = () => {
   }
 };
 
+const moveL2Enemies = () => {
+  for (const enemy of L2EnemyArray) {
+    enemy.pos += 0.04;
+    enemy.x = -Math.sin(enemy.pos) * L2_ENEMY_CIRCLE_RADIUS + L2_ENEMY_SPAWN_X;
+    enemy.y = Math.cos(enemy.pos) * L2_ENEMY_CIRCLE_RADIUS + L2_ENEMY_SPAWN_Y;
+    enemy.tryShoot();
+  }
+};
+
 const renderL1Enemies = () => {
   for (const enemy of L1EnemyArray) {
+    ctx.drawImage(
+      BASIC_ENEMY_IMAGE,
+      enemy.x,
+      enemy.y,
+      BASIC_ENEMY_HEIGHT,
+      BASIC_ENEMY_WIDTH
+    );
+  }
+};
+
+const renderL2Enemies = () => {
+  for (const enemy of L2EnemyArray) {
     ctx.drawImage(
       BASIC_ENEMY_IMAGE,
       enemy.x,
@@ -239,9 +329,27 @@ const drawL1EnemyProjectiles = () => {
   }
 };
 
+const drawL2EnemyProjectiles = () => {
+  for (const projectile of L2EnemyProjectileArray) {
+    ctx.drawImage(
+      ENEMY_PROJ_IMAGE,
+      projectile.x,
+      projectile.y,
+      PROJ_WIDTH,
+      PROJ_HEIGHT
+    );
+  }
+};
+
 const moveL1EnemyProjectiles = () => {
   for (const projectile of enemyProjectileArray) {
     projectile.moveL1EnemyProjectile();
+  }
+};
+
+const moveL2EnemyProjectiles = () => {
+  for (const projectile of L2EnemyProjectileArray) {
+    projectile.moveL2EnemyProjectile();
   }
 };
 // logging which keys were pressed in order to move or shoot projectiles
@@ -265,24 +373,35 @@ const keyUp = (keyboardEvent) => {
 
 window.addEventListener("keyup", keyUp);
 
-const basicEnemyHit = () => {
+const basicEnemyHit = (enemyArray) => {
   for (const projectile of projectileArray) {
-    for (const enemy of L1EnemyArray) {
+    for (const enemy of enemyArray) {
       if (projectile.checkEnemyCollision(enemy)) {
         const projIndex = projectileArray.indexOf(projectile);
-        const enemyIndex = L1EnemyArray.indexOf(enemy);
-        L1EnemyArray.splice(enemyIndex, 1);
+        const enemyIndex = enemyArray.indexOf(enemy);
+        enemyArray.splice(enemyIndex, 1);
         projectileArray.splice(projIndex, 1);
       } // die
     }
   }
 };
 
-const playerHit = () => {
+const L1PlayerHit = () => {
   for (const L1EnemyProjectile of enemyProjectileArray) {
     if (L1EnemyProjectile.checkPlayerCollision(player)) {
       const enemyProjIndex = enemyProjectileArray.indexOf(L1EnemyProjectile);
       enemyProjectileArray.splice(enemyProjIndex, 1);
+      hearts--;
+    } // die
+  }
+};
+
+const L2PlayerHit = () => {
+  for (const L2EnemyProjectile of L2EnemyProjectileArray) {
+    if (L2EnemyProjectile.checkPlayerCollision(player)) {
+      const L2EnemyProjIndex =
+        L2EnemyProjectileArray.indexOf(L2EnemyProjectile);
+      L2EnemyProjectileArray.splice(L2EnemyProjIndex, 1);
       hearts--;
     } // die
   }
@@ -322,10 +441,50 @@ const L1Passed = () => {
       ctx.font = "20px system-ui";
       ctx.fillText("Click to continue", CANVASWIDTH / 2, CANVASHEIGHT / 2);
     }, 2000);
+    screenName = "level1Completed";
+  }
+};
+
+const L2Passed = () => {
+  if (hearts > 0 && L2EnemyArray.length <= 0) {
+    setTimeout(() => {
+      ctx.fillStyle = "black";
+      ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      clearInterval(timer);
+      ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      ctx.fillStyle = "white";
+      ctx.font = "40px system-ui";
+      ctx.fillText("Level 3", CANVASWIDTH / 2 - 59, CANVASHEIGHT / 2 - 40);
+      ctx.font = "20px system-ui";
+      ctx.fillText("Click to continue", CANVASWIDTH / 2, CANVASHEIGHT / 2);
+      screenName = "level2Completed";
+    }, 2000);
   }
 };
 
 const L1Failed = () => {
+  if (hearts <= 0) {
+    setTimeout(() => {
+      ctx.fillStyle = "black";
+      ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      clearInterval(timer);
+      screenName = "gameOver";
+      console.log(screenName);
+      ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
+      ctx.fillStyle = "white";
+      ctx.font = "40px system-ui";
+      ctx.fillText("Game over", CANVASWIDTH / 2 - 90, CANVASHEIGHT / 2 - 40);
+      ctx.font = "20px system-ui";
+      ctx.fillText(
+        "Click anywhere to return to main menu",
+        CANVASWIDTH / 2 - 170,
+        CANVASHEIGHT / 2
+      );
+    }, 2000);
+  }
+};
+
+const L2Failed = () => {
   if (hearts <= 0) {
     setTimeout(() => {
       ctx.fillStyle = "black";
@@ -382,15 +541,24 @@ class Enemy {
   }
   tryShoot() {
     if (!this.canShoot) return;
-    enemyProjectileArray.push(
-      new L1EnemyProjectile(
-        this.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
-        this.y
-      )
-    );
-
-    this.canShoot = false; // Prevents further shooting
-    const shootingDelay = Math.floor(Math.random() * 4000) + 1000;
+    if (screenName == "level1") {
+      enemyProjectileArray.push(
+        new L1EnemyProjectile(
+          this.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
+          this.y
+        )
+      );
+    } else if (screenName == "level2") {
+      console.log("level two shoot");
+      L2EnemyProjectileArray.push(
+        new L2EnemyProjectile(
+          this.x + BASIC_ENEMY_WIDTH / 2 - PROJ_WIDTH / 2,
+          this.y
+        )
+      );
+    }
+    this.canShoot = false;
+    const shootingDelay = Math.floor(Math.random() * 1000) + 1000;
     setTimeout(() => {
       this.canShoot = true;
     }, shootingDelay);
@@ -414,6 +582,24 @@ class L1EnemyProjectile {
     this.y = y;
   }
   moveL1EnemyProjectile() {
+    this.y += PROJ_SPEED;
+  }
+  checkPlayerCollision(player) {
+    return (
+      this.x > player.x &&
+      this.x < player.x + player.width &&
+      this.y > player.y &&
+      this.y < player.y + player.height
+    );
+  }
+}
+
+class L2EnemyProjectile {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  moveL2EnemyProjectile() {
     this.y += PROJ_SPEED;
   }
   checkPlayerCollision(player) {
