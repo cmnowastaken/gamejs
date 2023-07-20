@@ -40,6 +40,7 @@ const HEART_Y = 40 - HEART_HEIGHT;
 let projY = playerY;
 let projectileArray = [];
 const keysPressed = {};
+
 let L1EnemyArray = [];
 const L1_ENEMY_SPAWN_X = 250;
 const L1_ENEMY_SPAWN_Y = 150;
@@ -58,9 +59,7 @@ const BASIC_ENEMY_WIDTH = 30;
 
 const TOTAL_L1_ENEMY_COUNT = 4;
 let L1EnemiesSpawned = 0;
-let enemyProjectileArray = [];
-let L2EnemyProjectileArray = [];
-let L3EnemyProjectileArray = [];
+
 let hearts = 5;
 let killPlayer = false;
 let screenName;
@@ -72,6 +71,10 @@ let L2EnemiesSpawned = 0;
 let L3EnemyArray = [];
 const TOTAL_L3_ENEMY_COUNT = 6;
 let L3EnemiesSpawned = 0;
+
+let enemyProjectileArray = [];
+let L2EnemyProjectileArray = [];
+let L3EnemyProjectileArray = [];
 // starting the canvas, calling my function which makes the start screen, and making sure the player will not be dead (this boolean turns true when the hearts = 0)
 
 const startCanvas = () => {
@@ -80,6 +83,8 @@ const startCanvas = () => {
   drawStartScreen();
   killPlayer = false;
 };
+
+//handling clicks for the later levels in the game
 
 const handleClicks = () => {
   if (screenName == "startScreen") {
@@ -386,15 +391,17 @@ const renderL3Enemies = () => {
 };
 
 const drawProjectiles = () => {
-  for (const projectile of projectileArray) {
-    ctx.drawImage(
-      PROJ_IMAGE,
-      projectile.x,
-      projectile.y,
-      PROJ_WIDTH,
-      PROJ_HEIGHT
-    );
-    projectile.y -= PROJ_SPEED;
+  if (!killPlayer) {
+    for (const projectile of projectileArray) {
+      ctx.drawImage(
+        PROJ_IMAGE,
+        projectile.x,
+        projectile.y,
+        PROJ_WIDTH,
+        PROJ_HEIGHT
+      );
+      projectile.y -= PROJ_SPEED;
+    }
   }
 };
 
@@ -545,6 +552,7 @@ const L1Passed = () => {
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
       screenName = "level1Completed";
+      projectileArray.length = 0;
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
@@ -562,6 +570,7 @@ const L2Passed = () => {
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
       screenName = "level2Completed";
+      projectileArray.length = 0;
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
@@ -579,6 +588,7 @@ const L3Passed = () => {
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
       screenName = "gameOver";
+      projectileArray.length = 0;
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
       ctx.font = "40px system-ui";
@@ -604,6 +614,7 @@ const L1Failed = () => {
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
       screenName = "gameOver";
+      L1EnemyArray.length = 0;
       console.log(screenName);
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
@@ -626,6 +637,8 @@ const L2Failed = () => {
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
       screenName = "gameOver";
+      L1EnemyArray.length = 0;
+      L2EnemyArray.length = 0;
       console.log(screenName);
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
@@ -648,6 +661,9 @@ const L3Failed = () => {
       ctx.clearRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       clearInterval(timer);
       screenName = "gameOver";
+      L1EnemyArray.length = 0;
+      L2EnemyArray.length = 0;
+      L3EnemyArray.length = 0;
       console.log(screenName);
       ctx.fillRect(0, 0, CANVASHEIGHT, CANVASWIDTH);
       ctx.fillStyle = "white";
